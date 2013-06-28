@@ -15,6 +15,7 @@ namespace Consensus.Models
 		}
 
 		public string Name { get; set; }
+		public string Topic { get; set; }
 
 		public virtual ICollection<PokerUser> Users { get; set; } 
 		public virtual ICollection<PokerCard> Cards { get; set; } 

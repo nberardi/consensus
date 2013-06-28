@@ -153,6 +153,7 @@
     <Content Include="Content\consensus.min.css">
       <DependentUpon>consensus.less</DependentUpon>
     </Content>
+    <Content Include="Content\images\background.gif" />
     <Content Include="Content\images\glyphicons-halflings-white.png" />
     <Content Include="Content\images\glyphicons-halflings.png" />
     <Content Include="Content\images\green-check.png" />

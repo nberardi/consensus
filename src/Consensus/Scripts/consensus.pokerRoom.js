@@ -11,8 +11,14 @@ var Consensus;
             this._poker = $.connection.poker;
             var that = this;
 
+            $scope.allCardsShowing = false;
+
             $scope.myCardValueChanged = function () {
                 that.changedMyCardValue($scope.myCard.Value);
+            };
+
+            $scope.roomTopicChanged = function () {
+                that.changeRoomTopic($scope.room.Topic);
             };
 
             $scope.closeJoinModal = function () {
@@ -21,7 +27,8 @@ var Consensus;
                 $scope.joinModal = false;
 
                 that.join(that.getMe());
-                $scope.joinRoomModal = !$scope.joinModal && !this.getRoom();
+                $scope.joinRoomModal = !$scope.joinModal && !that.getRoom();
+                $scope.$apply();
             };
 
             $scope.closeJoinRoomModal = function () {
@@ -29,6 +36,14 @@ var Consensus;
                 $scope.joinRoomModal = false;
 
                 that.joinRoom(that.getRoom());
+            };
+
+            $scope.resetRoom = function () {
+                that.resetRoom();
+            };
+
+            $scope.showAllCards = function () {
+                that.showAllCards();
             };
 
             $scope.joinModalOptions = {
@@ -45,6 +60,18 @@ var Consensus;
             };
             this._poker.client.cardChanged = function (card) {
                 return _this.cardChanged(card);
+            };
+            this._poker.client.roomTopicChanged = function (topic) {
+                $scope.room.Topic = topic;
+                $scope.$apply();
+            };
+            this._poker.client.showAllCards = function () {
+                $scope.allCardsShowing = true;
+                $scope.$apply();
+            };
+            this._poker.client.resetRoom = function (room) {
+                $scope.room = room;
+                $scope.$apply();
             };
 
             $.connection.hub.start().done(function () {
@@ -115,8 +142,19 @@ var Consensus;
             return value;
         };
 
+        PokerRoomCtrl.prototype.resetRoom = function () {
+            return this._poker.server.resetRoom(this.getRoom());
+        };
+
+        PokerRoomCtrl.prototype.showAllCards = function () {
+            return this._poker.server.showAllCards(this.getRoom());
+        };
+
+        PokerRoomCtrl.prototype.changeRoomTopic = function (topic) {
+            return this._poker.server.changeRoomTopic(this.getRoom(), topic);
+        };
+
         PokerRoomCtrl.prototype.changedMyCardValue = function (value) {
-            var that = this;
             return this._poker.server.changedCard(this.getRoom(), value);
         };
 

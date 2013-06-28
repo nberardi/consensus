@@ -7,7 +7,7 @@ namespace Consensus
 	{
 		public static void RegisterBundles(BundleCollection bundles)
 		{
-			var appJsHead = new ScriptBundle("~/js/app").Include(
+			var appJs = new ScriptBundle("~/js/app").Include(
 					"~/scripts/jquery-{version}.js",
 					"~/scripts/bootstrap.js",
 					"~/scripts/angular.js",
@@ -16,7 +16,8 @@ namespace Consensus
 					"~/scripts/jquery.signalR-{version}.js",
 					"~/scripts/consensus.pokerRoom.js");
 
-			bundles.Add(appJsHead);
+			appJs.Transforms.Clear();
+			bundles.Add(appJs);
 
 			var appCss = new StyleBundle("~/css/app").Include(
 					"~/content/bootstrap.css",

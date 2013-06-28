@@ -6,6 +6,9 @@ interface IPokerRoomClient {
 	addRoomUser(user: Consensus.PokerUser);
 	disconnectedRoomUser(user: Consensus.PokerUser);
 
+	resetRoom(room: Consensus.PokerRoom);
+	showAllCards();
+	roomTopicChanged(topic: string);
 	cardChanged(card: Consensus.PokerCard);
 }
 
@@ -13,6 +16,9 @@ interface IPokerRoomServer {
 	join(user: Consensus.PokerUser): JQueryPromise;
 	joinRoom(room: Consensus.PokerRoom): JQueryPromise;
 
+	resetRoom(room: Consensus.PokerRoom);
+	showAllCards(room: Consensus.PokerRoom);
+	changeRoomTopic(room: Consensus.PokerRoom, topic: string);
 	changedCard(room: Consensus.PokerRoom, value: string);
 }
 
@@ -39,6 +45,11 @@ module Consensus {
 		closeJoinRoomModal();
 
 		myCardValueChanged();
+		roomTopicChanged();
+		resetRoom();
+		showAllCards();
+
+		allCardsShowing: bool;
 
 		me: PokerUser;
 		room: PokerRoom;
@@ -52,8 +63,14 @@ module Consensus {
 			this._poker = $.connection.poker;
 			var that = this;
 
+			$scope.allCardsShowing = false;
+
 			$scope.myCardValueChanged = function () {
 				that.changedMyCardValue($scope.myCard.Value);
+			};
+
+			$scope.roomTopicChanged = function () {
+				that.changeRoomTopic($scope.room.Topic);
 			};
 
 			$scope.closeJoinModal = function () {
@@ -62,7 +79,8 @@ module Consensus {
 				$scope.joinModal = false;
 
 				that.join(that.getMe());
-				$scope.joinRoomModal = !$scope.joinModal && !this.getRoom();
+				$scope.joinRoomModal = !$scope.joinModal && !that.getRoom();
+				$scope.$apply();
 			};
 
 			$scope.closeJoinRoomModal = function () {
@@ -70,6 +88,14 @@ module Consensus {
 				$scope.joinRoomModal = false;
 
 				that.joinRoom(that.getRoom());
+			};
+
+			$scope.resetRoom = function () {
+				that.resetRoom();
+			};
+
+			$scope.showAllCards = function () {
+				that.showAllCards();
 			};
 
 			$scope.joinModalOptions = {
@@ -81,6 +107,18 @@ module Consensus {
 			this._poker.client.addRoomUser = (user: PokerUser) => this.addRoomUser(user);
 			this._poker.client.disconnectedRoomUser = (user: PokerUser) => this.disconnectedRoomUser(user);
 			this._poker.client.cardChanged = (card: PokerCard) => this.cardChanged(card);
+			this._poker.client.roomTopicChanged = (topic: string) => {
+				$scope.room.Topic = topic;
+				$scope.$apply();
+			};
+			this._poker.client.showAllCards = () => {
+				$scope.allCardsShowing = true;
+				$scope.$apply();
+			};
+			this._poker.client.resetRoom = (room: PokerRoom) => {
+				$scope.room = room;
+				$scope.$apply();
+			};
 
 			$.connection.hub.start().done(function () {
 				if (that.getMe()) {
@@ -151,8 +189,19 @@ module Consensus {
 			return value;
 		}
 
+		private resetRoom(): JQueryDeferred {
+			return this._poker.server.resetRoom(this.getRoom());
+		}
+
+		private showAllCards(): JQueryDeferred {
+			return this._poker.server.showAllCards(this.getRoom());
+		}
+
+		private changeRoomTopic(topic: string): JQueryDeferred {
+			return this._poker.server.changeRoomTopic(this.getRoom(), topic);
+		}
+
 		private changedMyCardValue(value: string): JQueryDeferred {
-			var that = this;
 			return this._poker.server.changedCard(this.getRoom(), value);
 		}
 
@@ -242,6 +291,7 @@ module Consensus {
 
 	export class PokerRoom {
 		public Name: string;
+		public Topic: string;
 		public Users: PokerUser[];
 		public Cards: PokerCard[];
 	}

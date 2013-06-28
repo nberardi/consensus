@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Consensus.Models;
@@ -59,6 +60,71 @@ namespace Consensus.Hubs
 			Groups.Add(Context.ConnectionId, room.Name);
 
 			return room;
+		}
+
+		public void ResetRoom(PokerRoom room)
+		{
+			var user = _users.Where(x => x.Key == Context.ConnectionId).Select(x => x.Value).FirstOrDefault();
+
+			if (user == null)
+				throw new Exception("No user with this connection Id has joined yet.");
+
+			room = _rooms.FirstOrDefault(x => x.Name == room.Name);
+
+			if (room == null)
+				throw new Exception("No room with this name exists.");
+
+			if (room.Users.All(x => x.Email != user.Email)) {
+				throw new Exception("User hasn't joined this room yet.");
+			}
+
+			room.Topic = "";
+			room.Cards = new List<PokerCard>();
+
+			// tell the people in this room that the topic has changed
+			Clients.Group(room.Name).resetRoom(room);
+		}
+
+		public void ShowAllCards(PokerRoom room)
+		{
+			var user = _users.Where(x => x.Key == Context.ConnectionId).Select(x => x.Value).FirstOrDefault();
+
+			if (user == null)
+				throw new Exception("No user with this connection Id has joined yet.");
+
+			room = _rooms.FirstOrDefault(x => x.Name == room.Name);
+
+			if (room == null)
+				throw new Exception("No room with this name exists.");
+
+			if (room.Users.All(x => x.Email != user.Email)) {
+				throw new Exception("User hasn't joined this room yet.");
+			}
+
+			// tell the people in this room that the topic has changed
+			Clients.Group(room.Name).showAllCards();
+		}
+
+		public void ChangeRoomTopic(PokerRoom room, string topic)
+		{
+			var user = _users.Where(x => x.Key == Context.ConnectionId).Select(x => x.Value).FirstOrDefault();
+
+			if (user == null)
+				throw new Exception("No user with this connection Id has joined yet.");
+
+			room = _rooms.FirstOrDefault(x => x.Name == room.Name);
+
+			if (room == null)
+				throw new Exception("No room with this name exists.");
+
+			if (room.Users.All(x => x.Email != user.Email)) {
+				throw new Exception("User hasn't joined this room yet.");
+			}
+
+			room.Topic = topic;
+
+			// tell the people in this room that the topic has changed
+			Clients.Group(room.Name).roomTopicChanged(topic);
 		}
 
 		public void ChangedCard(PokerRoom room, string cardValue)
