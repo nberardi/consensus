@@ -1,0 +1,35 @@
+﻿.card {
+    display: block;
+    float: left;
+    width: 150px;
+    height: 210px;
+    border: 5px double black;
+    border-radius: 8px;
+    margin-right: 1em;
+    text-align: center;
+
+    .value {
+        font-size: 75px;
+        display: inline-block;
+        margin-top: 70px;
+    }
+
+    .name {
+        bottom: 5px;
+    }
+
+    &.card-hidden .value {
+        display: none;
+    }
+
+    &.card-selected {
+        background-image: url(/Content/images/green-check.png);
+        -moz-background-size: 100px 140px;
+        -o-background-size: 100px 140px;
+        -webkit-background-size: 100px 140px;
+        background-size: 100px 140px;
+        background-position-x: center;
+        background-position-y: center;
+        background-repeat: no-repeat;
+    }
+}

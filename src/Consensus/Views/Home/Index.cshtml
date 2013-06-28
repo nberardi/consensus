@@ -1,0 +1,89 @@
+﻿@{
+	Layout = null;
+}
+
+<!DOCTYPE html>
+<html data-ng-app="consensus">
+	<head>
+		<title>Consensus</title>
+		
+		@Styles.Render("~/css/app")
+		@Scripts.Render("~/js/app")
+		<script src="~/signalr/hubs"> </script>
+	</head>
+	<body>
+		<div data-ng-controller="Consensus.PokerRoomCtrl">
+			<div class="navbar">
+				<div class="navbar-inner">
+					<a class="brand" href="#">Room: {{ room.Name }}</a>
+					<ul class="nav">
+					</ul>
+				</div>
+			</div>
+
+
+			<div class="row-fluid">
+				<section class="span10">
+					
+					<div class="row-fluid input-append">
+						<select data-ng-model="myCard.Value" data-ng-change="myCardValueChanged()" required>
+							<option value="">Make Card Selection</option>
+							<option>0</option>
+							<option>1/2</option>
+							<option>1</option>
+							<option>2</option>
+							<option>3</option>
+							<option>5</option>
+							<option>8</option>
+							<option>13</option>
+							<option>20</option>
+							<option>40</option>
+							<option>100</option>
+							<option>?</option>
+						</select>
+					</div>
+
+					<ul class="row-fluid cards">
+						<li class="card" data-ng-repeat="card in room.Cards" data-ng-class="{ 'card-hidden': card.User.Email != me.Email, 'card-selected': card.Value.length > 0 }">
+							<div class="name">{{ card.User.Name }}</div>
+							<div class="value">{{ card.Value }}</div>
+						</li>
+					</ul>
+				</section>
+				
+				<ul class="span2">
+					<li data-ng-repeat="user in room.Users" data-ng-class="{ disabled: user.Disconnected, me: user.Email == me.Email }">
+						{{ user.Name }}
+					</li>
+				</ul>
+			</div>
+			
+			<div id="joinModal" class="modal hide fade" data-modal="joinModal" data-close="closeJoinModal()" data-options="joinModalOptions">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					<h3>Join Consensus</h3>
+				</div>
+				<div class="modal-body">
+					<p><label>Your Name<br/><input type="text" data-ng-model="me.Name" placeholder="Your Name" required /></label></p>
+					<p><label>Your Email<br/><input type="email" data-ng-model="me.Email" placeholder="Your Email" required /></label></p>
+				</div>
+				<div class="modal-footer">
+					<a href="#" class="btn btn-primary" data-ng-click="closeJoinModal()">Join</a>
+				</div>
+			</div>
+
+			<div id="joinRoomModal" class="modal hide fade" data-modal="joinRoomModal" data-close="closeJoinRoomModal()" data-options="joinModalOptions">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					<h3>Join Room</h3>
+				</div>
+				<div class="modal-body">
+					<p><label>Poker Room Name<br/><input type="text" data-ng-model="room.Name" placeholder="Room Name" required /></label></p>
+				</div>
+				<div class="modal-footer">
+					<a href="#" class="btn btn-primary" data-ng-click="closeJoinRoomModal()">Join</a>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
