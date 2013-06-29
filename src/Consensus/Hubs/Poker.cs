@@ -62,6 +62,30 @@ namespace Consensus.Hubs
 			return room;
 		}
 
+		public void LeaveRoom(PokerRoom room, PokerUser user)
+		{
+			var contextUser = _users.Where(x => x.Key == Context.ConnectionId).Select(x => x.Value).FirstOrDefault();
+
+			if (contextUser == null)
+				throw new Exception("No user with this connection Id has joined yet.");
+
+			room = _rooms.FirstOrDefault(x => x.Name == room.Name);
+
+			if (room == null)
+				throw new Exception("No room with this name exists.");
+
+			if (room.Users.All(x => x.Email != contextUser.Email))
+				throw new Exception("User hasn't joined this room yet.");
+
+			if (room.Users.All(x => x.Email != user.Email))
+				throw new Exception("User being removed hasn't joined this room yet.");
+
+			room.Users = room.Users.Where(x => x.Email != user.Email).ToList();
+
+			// tell the people in this room that user has been removed
+			Clients.Group(room.Name).removeRoomUser(user);
+		}
+
 		public void ResetRoom(PokerRoom room)
 		{
 			var user = _users.Where(x => x.Key == Context.ConnectionId).Select(x => x.Value).FirstOrDefault();

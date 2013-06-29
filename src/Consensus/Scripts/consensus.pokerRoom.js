@@ -38,6 +38,10 @@ var Consensus;
                 that.joinRoom(that.getRoom());
             };
 
+            $scope.removeRoomUser = function () {
+                that.leaveRoom(this.user);
+            };
+
             $scope.resetRoom = function () {
                 that.resetRoom();
             };
@@ -55,6 +59,9 @@ var Consensus;
             this._poker.client.addRoomUser = function (user) {
                 return _this.addRoomUser(user);
             };
+            this._poker.client.removeRoomUser = function (user) {
+                return _this.removeRoomUser(user);
+            };
             this._poker.client.disconnectedRoomUser = function (user) {
                 return _this.disconnectedRoomUser(user);
             };
@@ -71,6 +78,7 @@ var Consensus;
             };
             this._poker.client.resetRoom = function (room) {
                 $scope.room = room;
+                $scope.myCard.Value = "";
                 $scope.$apply();
             };
 
@@ -166,6 +174,10 @@ var Consensus;
             });
         };
 
+        PokerRoomCtrl.prototype.leaveRoom = function (user) {
+            return this._poker.server.leaveRoom(this.getRoom(), user);
+        };
+
         PokerRoomCtrl.prototype.joinRoom = function (room) {
             var that = this;
             return this._poker.server.joinRoom(room).done(function (data) {
@@ -195,6 +207,23 @@ var Consensus;
 
             if (!found)
                 this.$scope.room.Users.push(user);
+
+            this.$scope.$apply();
+        };
+
+        PokerRoomCtrl.prototype.removeRoomUser = function (user) {
+            var found = false;
+
+            if (user.Email === this.$scope.me.Email) {
+                this.$scope.room = null;
+                this.$scope.myCard = null;
+                this.$location.path("");
+                this.$scope.joinRoomModal = true;
+            } else {
+                this.$scope.room.Users = this.$scope.room.Users.filter(function (roomUser) {
+                    return user.Email !== roomUser.Email;
+                });
+            }
 
             this.$scope.$apply();
         };

@@ -54,7 +54,7 @@
 					
 				<ul>
 					<li data-ng-repeat="user in room.Users" data-ng-class="{ disabled: user.Disconnected, me: user.Email == me.Email }">
-						{{ user.Name }}
+						<i class="icon icon-white icon-trash" data-ng-click="removeRoomUser()"></i> {{ user.Name }}
 					</li>
 				</ul>
 			</div>
