@@ -101,7 +101,7 @@ var Consensus;
             $.connection.hub.start().done(function () {
                 if (that.me) {
                     that.join().done(function () {
-                        if (that.me) {
+                        if (that.room) {
                             that.joinRoom();
                         } else {
                             $scope.joinRoomModal = true;
@@ -291,6 +291,8 @@ var Consensus;
         return PokerRoomCtrl;
     })();
     Consensus.PokerRoomCtrl = PokerRoomCtrl;
+
+    app.controller("PokerRoomCtrl", PokerRoomCtrl);
 
     var PokerUser = (function () {
         function PokerUser() {

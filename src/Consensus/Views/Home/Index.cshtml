@@ -11,7 +11,7 @@
 		@Scripts.Render("~/js/app")
 		<script src="~/signalr/hubs"> </script>
 	</head>
-	<body data-ng-controller="Consensus.PokerRoomCtrl" data-ng-class="{ 'hide-room': joinModal || joinRoomModal }">
+	<body data-ng-controller="PokerRoomCtrl" data-ng-class="{ 'hide-room': joinModal || joinRoomModal }">
 
 		<div class="container-fluid playing-field">
 			<h2>Room: {{ room.Name }}</h2>

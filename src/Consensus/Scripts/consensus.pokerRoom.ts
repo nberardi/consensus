@@ -147,7 +147,7 @@ module Consensus {
 			$.connection.hub.start().done(function () {
 				if (that.me) {
 					that.join().done(function () {
-						if (that.me) {
+						if (that.room) {
 							that.joinRoom();
 						} else {
 							$scope.joinRoomModal = true;
@@ -328,6 +328,9 @@ module Consensus {
 
 		//#endregion
 	}
+
+	// setup controller
+	app.controller("PokerRoomCtrl", PokerRoomCtrl);
 
 	export class PokerUser {
 		public Name: string;
