@@ -9,7 +9,7 @@ interface IPokerRoomClient {
 	cardChanged(card: Consensus.PokerCard);
 
 	resetRoom(room: Consensus.PokerRoom);
-	showAllCards();
+	showAllCards(show: boolean);
 	roomTopicChanged(topic: string);
 }
 
@@ -19,7 +19,7 @@ interface IPokerRoomServer {
 	leaveRoom(room: Consensus.PokerRoom, user: Consensus.PokerUser): JQueryPromise;
 
 	resetRoom(room: Consensus.PokerRoom): JQueryPromise;
-	showAllCards(room: Consensus.PokerRoom): JQueryPromise;
+	showAllCards(room: Consensus.PokerRoom, show: boolean): JQueryPromise;
 	changeRoomTopic(room: Consensus.PokerRoom, topic: string): JQueryPromise;
 	changedCard(room: Consensus.PokerRoom, value: string): JQueryPromise;
 }
@@ -50,7 +50,7 @@ module Consensus {
 		myCardValueChanged();
 		roomTopicChanged();
 		resetRoom();
-		showAllCards();
+		showAllCards(show: boolean);
 
 		allCardsShowing: bool;
 
@@ -118,8 +118,8 @@ module Consensus {
 				that.resetRoom();
 			};
 
-			$scope.showAllCards = function () {
-				that.showAllCards();
+			$scope.showAllCards = function (show: boolean) {
+				that.showAllCards(show);
 			};
 
 			$scope.joinModalOptions = {
@@ -134,8 +134,8 @@ module Consensus {
 				$scope.room.Topic = topic;
 				$scope.$apply();
 			};
-			this._poker.client.showAllCards = () => {
-				$scope.allCardsShowing = true;
+			this._poker.client.showAllCards = (show: boolean) => {
+				$scope.allCardsShowing = show;
 				$scope.$apply();
 			};
 			this._poker.client.resetRoom = (room: PokerRoom) => {
@@ -314,8 +314,8 @@ module Consensus {
 			return this._poker.server.resetRoom(this.room);
 		}
 
-		private showAllCards(): JQueryPromise {
-			return this._poker.server.showAllCards(this.room);
+		private showAllCards(show: boolean = true): JQueryPromise {
+			return this._poker.server.showAllCards(this.room, show);
 		}
 
 		private changeRoomTopic(topic: string): JQueryPromise {

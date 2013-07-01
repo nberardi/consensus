@@ -16,8 +16,8 @@
 		<div class="container-fluid playing-field">
 			<h2>Room: {{ room.Name }}</h2>
 			
-			<a class="pull-right btn btn-danger" data-ng-click="resetRoom()">Reset Room</a>
-			<a class="pull-right btn btn-info" data-ng-click="showAllCards()">Show All Cards</a>
+			<button class="pull-right btn btn-danger" data-ng-click="resetRoom()">Reset Room</button>
+			<button class="pull-right btn btn-info" data-ng-click="showAllCards(!allCardsShowing)">{{ allCardsShowing && 'Hide' || 'Show' }} All Cards</button>
 
 			<section>
 				<div class="row-fluid">

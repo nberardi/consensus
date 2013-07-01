@@ -106,12 +106,12 @@ namespace Consensus.Hubs
 			Clients.Group(room.Name).resetRoom(room);
 		}
 
-		public void ShowAllCards(PokerRoom room)
+		public void ShowAllCards(PokerRoom room, bool show)
 		{
 			AssertContextUserJoinedRoom(room.Name);
 
 			// tell the people in this room that the topic has changed
-			Clients.Group(room.Name).showAllCards();
+			Clients.Group(room.Name).showAllCards(show);
 		}
 
 		public void ChangeRoomTopic(PokerRoom room, string topic)

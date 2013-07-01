@@ -66,8 +66,8 @@ var Consensus;
                 that.resetRoom();
             };
 
-            $scope.showAllCards = function () {
-                that.showAllCards();
+            $scope.showAllCards = function (show) {
+                that.showAllCards(show);
             };
 
             $scope.joinModalOptions = {
@@ -88,8 +88,8 @@ var Consensus;
                 $scope.room.Topic = topic;
                 $scope.$apply();
             };
-            this._poker.client.showAllCards = function () {
-                $scope.allCardsShowing = true;
+            this._poker.client.showAllCards = function (show) {
+                $scope.allCardsShowing = show;
                 $scope.$apply();
             };
             this._poker.client.resetRoom = function (room) {
@@ -276,8 +276,9 @@ var Consensus;
             return this._poker.server.resetRoom(this.room);
         };
 
-        PokerRoomCtrl.prototype.showAllCards = function () {
-            return this._poker.server.showAllCards(this.room);
+        PokerRoomCtrl.prototype.showAllCards = function (show) {
+            if (typeof show === "undefined") { show = true; }
+            return this._poker.server.showAllCards(this.room, show);
         };
 
         PokerRoomCtrl.prototype.changeRoomTopic = function (topic) {
