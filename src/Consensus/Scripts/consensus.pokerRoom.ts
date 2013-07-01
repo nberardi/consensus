@@ -6,11 +6,10 @@ interface IPokerRoomClient {
 	userChanged(user: Consensus.PokerUser);
 	userRemoved(user: Consensus.PokerUser);
 
-	cardChanged(card: Consensus.PokerCard);
-
 	resetRoom(room: Consensus.PokerRoom);
 	showAllCards(show: boolean);
 	roomTopicChanged(topic: string);
+	cardChanged(card: Consensus.PokerCard);
 }
 
 interface IPokerRoomServer {
@@ -62,6 +61,9 @@ module Consensus {
 	export class PokerRoomCtrl {
 		private _poker: HubProxy;
 		
+		// protect the injection from minification
+		static $inject = ['$scope', '$location', '$cookies'];
+
 		constructor(private $scope: IPokerRoomScope, private $location: ng.ILocationService, private $cookies: any) {
 			this._poker = $.connection.poker;
 			var that = this;

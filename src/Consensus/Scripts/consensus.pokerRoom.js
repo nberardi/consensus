@@ -288,6 +288,7 @@ var Consensus;
         PokerRoomCtrl.prototype.changedMyCardValue = function (value) {
             return this._poker.server.changedCard(this.room, value);
         };
+        PokerRoomCtrl.$inject = ['$scope', '$location', '$cookies'];
         return PokerRoomCtrl;
     })();
     Consensus.PokerRoomCtrl = PokerRoomCtrl;
