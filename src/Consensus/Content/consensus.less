@@ -3,6 +3,14 @@
     *background: url(/Content/images/background.gif); /* For IE 6 and 7 */
     background-position: right top;
     background-repeat: repeat-y;
+
+    &.hide-room {
+        background-image: none;
+
+        .container-fluid {
+            display: none;
+        }
+    }
 }
 
 .playing-field {

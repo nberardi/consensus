@@ -55,45 +55,21 @@ namespace Consensus.Hubs
 			}
 
 			// tell the people in this room that you've joined
-			Clients.Group(room.Name).addRoomUser(user);
+			Clients.Group(room.Name).userChanged(user);
 
 			Groups.Add(Context.ConnectionId, room.Name);
 
 			return room;
 		}
 
-		public void LeaveRoom(PokerRoom room, PokerUser user)
-		{
-			var contextUser = _users.Where(x => x.Key == Context.ConnectionId).Select(x => x.Value).FirstOrDefault();
-
-			if (contextUser == null)
-				throw new Exception("No user with this connection Id has joined yet.");
-
-			room = _rooms.FirstOrDefault(x => x.Name == room.Name);
-
-			if (room == null)
-				throw new Exception("No room with this name exists.");
-
-			if (room.Users.All(x => x.Email != contextUser.Email))
-				throw new Exception("User hasn't joined this room yet.");
-
-			if (room.Users.All(x => x.Email != user.Email))
-				throw new Exception("User being removed hasn't joined this room yet.");
-
-			room.Users = room.Users.Where(x => x.Email != user.Email).ToList();
-
-			// tell the people in this room that user has been removed
-			Clients.Group(room.Name).removeRoomUser(user);
-		}
-
-		public void ResetRoom(PokerRoom room)
+		private void AssertContextUserJoinedRoom(string roomName)
 		{
 			var user = _users.Where(x => x.Key == Context.ConnectionId).Select(x => x.Value).FirstOrDefault();
 
 			if (user == null)
 				throw new Exception("No user with this connection Id has joined yet.");
 
-			room = _rooms.FirstOrDefault(x => x.Name == room.Name);
+			var room = _rooms.FirstOrDefault(x => x.Name == roomName);
 
 			if (room == null)
 				throw new Exception("No room with this name exists.");
@@ -101,7 +77,28 @@ namespace Consensus.Hubs
 			if (room.Users.All(x => x.Email != user.Email)) {
 				throw new Exception("User hasn't joined this room yet.");
 			}
+		}
 
+		public void LeaveRoom(PokerRoom room, PokerUser user)
+		{
+			AssertContextUserJoinedRoom(room.Name);
+			room = _rooms.FirstOrDefault(x => x.Name == room.Name);
+
+			if (room.Users.All(x => x.Email != user.Email))
+				throw new Exception("User being removed hasn't joined this room yet.");
+
+			room.Users = room.Users.Where(x => x.Email != user.Email).ToList();
+			room.Cards = room.Cards.Where(x => x.User.Email != user.Email).ToList();
+
+			// tell the people in this room that user has been removed
+			Clients.Group(room.Name).userRemoved(user);
+		}
+
+		public void ResetRoom(PokerRoom room)
+		{
+			AssertContextUserJoinedRoom(room.Name);
+
+			room = _rooms.FirstOrDefault(x => x.Name == room.Name);
 			room.Topic = "";
 			room.Cards = new List<PokerCard>();
 
@@ -111,19 +108,7 @@ namespace Consensus.Hubs
 
 		public void ShowAllCards(PokerRoom room)
 		{
-			var user = _users.Where(x => x.Key == Context.ConnectionId).Select(x => x.Value).FirstOrDefault();
-
-			if (user == null)
-				throw new Exception("No user with this connection Id has joined yet.");
-
-			room = _rooms.FirstOrDefault(x => x.Name == room.Name);
-
-			if (room == null)
-				throw new Exception("No room with this name exists.");
-
-			if (room.Users.All(x => x.Email != user.Email)) {
-				throw new Exception("User hasn't joined this room yet.");
-			}
+			AssertContextUserJoinedRoom(room.Name);
 
 			// tell the people in this room that the topic has changed
 			Clients.Group(room.Name).showAllCards();
@@ -131,20 +116,9 @@ namespace Consensus.Hubs
 
 		public void ChangeRoomTopic(PokerRoom room, string topic)
 		{
-			var user = _users.Where(x => x.Key == Context.ConnectionId).Select(x => x.Value).FirstOrDefault();
-
-			if (user == null)
-				throw new Exception("No user with this connection Id has joined yet.");
+			AssertContextUserJoinedRoom(room.Name);
 
 			room = _rooms.FirstOrDefault(x => x.Name == room.Name);
-
-			if (room == null)
-				throw new Exception("No room with this name exists.");
-
-			if (room.Users.All(x => x.Email != user.Email)) {
-				throw new Exception("User hasn't joined this room yet.");
-			}
-
 			room.Topic = topic;
 
 			// tell the people in this room that the topic has changed
@@ -153,19 +127,10 @@ namespace Consensus.Hubs
 
 		public void ChangedCard(PokerRoom room, string cardValue)
 		{
+			AssertContextUserJoinedRoom(room.Name);
+
 			var user = _users.Where(x => x.Key == Context.ConnectionId).Select(x => x.Value).FirstOrDefault();
-
-			if (user == null)
-				throw new Exception("No user with this connection Id has joined yet.");
-
 			room = _rooms.FirstOrDefault(x => x.Name == room.Name);
-
-			if (room == null)
-				throw new Exception("No room with this name exists.");
-
-			if (room.Users.All(x => x.Email != user.Email)) {
-				throw new Exception("User hasn't joined this room yet.");
-			}
 
 			var card = room.Cards.FirstOrDefault(x => x.User.Email == user.Email);
 
@@ -192,7 +157,7 @@ namespace Consensus.Hubs
 
 				// tell the people in this room that you've been disconnected
 				foreach(var room in _rooms.Where(x => x.Users.Contains(user)))
-					Clients.Group(room.Name).disconnectedRoomUser(user);
+					Clients.Group(room.Name).userChanged(user);
 			}
 
 			return base.OnDisconnected();

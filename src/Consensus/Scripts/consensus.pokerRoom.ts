@@ -3,14 +3,14 @@
 /// <reference path="typings/signalr/signalr.d.ts" />
 
 interface IPokerRoomClient {
-	addRoomUser(user: Consensus.PokerUser);
-	removeRoomUser(user: Consensus.PokerUser);
-	disconnectedRoomUser(user: Consensus.PokerUser);
+	userChanged(user: Consensus.PokerUser);
+	userRemoved(user: Consensus.PokerUser);
+
+	cardChanged(card: Consensus.PokerCard);
 
 	resetRoom(room: Consensus.PokerRoom);
 	showAllCards();
 	roomTopicChanged(topic: string);
-	cardChanged(card: Consensus.PokerCard);
 }
 
 interface IPokerRoomServer {
@@ -66,6 +66,19 @@ module Consensus {
 			this._poker = $.connection.poker;
 			var that = this;
 
+			$scope.$watch("room.Name", function (value) {
+				if (!value) return;
+				$location.path("/rooms/" + encodeURIComponent(value));
+			});
+			$scope.$watch("me.Email", function (value) {
+				if (!value) return;
+				$cookies.userEmail = value;
+			});
+			$scope.$watch("me.Name", function (value) {
+				if (!value) return;
+				$cookies.userName = value;
+			});
+
 			$scope.allCardsShowing = false;
 
 			$scope.myCardValueChanged = function () {
@@ -77,20 +90,24 @@ module Consensus {
 			};
 
 			$scope.closeJoinModal = function () {
-				$cookies.userEmail = $scope.me.Email;
-				$cookies.userName = $scope.me.Name;
-				$scope.joinModal = false;
+				$scope.joinModal = !$scope.me.Name || !$scope.me.Email;
+				$scope.joinRoomModal = !$scope.joinModal && !that.room;
 
-				that.join(that.getMe());
-				$scope.joinRoomModal = !$scope.joinModal && !that.getRoom();
-				$scope.$apply();
+				if (!$scope.joinModal) {
+					that.join();
+				}
+
+				if (!$scope.joinRoomModal) {
+					that.joinRoom();
+				}
 			};
 
 			$scope.closeJoinRoomModal = function () {
-				$location.path("/rooms/" + $scope.room.Name);
-				$scope.joinRoomModal = false;
+				$scope.joinRoomModal = !$scope.room.Name;
 
-				that.joinRoom(that.getRoom());
+				if (!$scope.joinRoomModal) {
+					that.joinRoom();
+				}
 			};
 
 			$scope.removeRoomUser = function () {
@@ -106,14 +123,12 @@ module Consensus {
 			};
 
 			$scope.joinModalOptions = {
-				backdropFade: true,
-				dialogFade: true,
-				keyboard: true
+				backdrop: false,
+				backdropClick: false
 			};
 
-			this._poker.client.addRoomUser = (user: PokerUser) => this.addRoomUser(user);
-			this._poker.client.removeRoomUser = (user: PokerUser) => this.removeRoomUser(user);
-			this._poker.client.disconnectedRoomUser = (user: PokerUser) => this.disconnectedRoomUser(user);
+			this._poker.client.userChanged = (user: PokerUser) => this.userChanged(user);
+			this._poker.client.userRemoved = (user: PokerUser) => this.userRemoved(user);
 			this._poker.client.cardChanged = (card: PokerCard) => this.cardChanged(card);
 			this._poker.client.roomTopicChanged = (topic: string) => {
 				$scope.room.Topic = topic;
@@ -130,10 +145,10 @@ module Consensus {
 			};
 
 			$.connection.hub.start().done(function () {
-				if (that.getMe()) {
-					that.join(that.getMe()).done(function () {
-						if (that.getRoom()) {
-							that.joinRoom(that.getRoom());
+				if (that.me) {
+					that.join().done(function () {
+						if (that.me) {
+							that.joinRoom();
 						} else {
 							$scope.joinRoomModal = true;
 							$scope.$apply();
@@ -146,7 +161,7 @@ module Consensus {
 			});
 		}
 
-		getMyCard(): PokerCard {
+		get myCard(): PokerCard {
 			var value = this.$scope.myCard;
 
 			if (!value) {
@@ -157,14 +172,14 @@ module Consensus {
 					return null;
 
 				value = new PokerCard();
-				value.User = this.getMe();
+				value.User = this.me;
 				value.Value = "";
 			}
 
 			return value;
 		}
 
-		getMe(): PokerUser {
+		get me(): PokerUser {
 			var value = this.$scope.me;
 
 			if (!value) {
@@ -182,7 +197,7 @@ module Consensus {
 			return value;
 		}
 
-		getRoom(): PokerRoom {
+		get room(): PokerRoom {
 			var value = this.$scope.room;
 
 			if (!value) {
@@ -193,73 +208,36 @@ module Consensus {
 
 				value = new PokerRoom();
 				value.Name = roomName;
+
+				this.$scope.room = value;
 			}
 
 			return value;
 		}
 
-		private resetRoom(): JQueryPromise {
-			return this._poker.server.resetRoom(this.getRoom());
-		}
+		//#region Client
 
-		private showAllCards(): JQueryPromise {
-			return this._poker.server.showAllCards(this.getRoom());
-		}
+		private userChanged(user: PokerUser) {
+			if (this.$scope.room.Users) {
+				var found = false;
 
-		private changeRoomTopic(topic: string): JQueryPromise {
-			return this._poker.server.changeRoomTopic(this.getRoom(), topic);
-		}
+				this.$scope.room.Users = this.$scope.room.Users.map(function (roomUser) {
+					if (user.Email === roomUser.Email) {
+						found = true;
+						roomUser = user;
+					}
 
-		private changedMyCardValue(value: string): JQueryPromise {
-			return this._poker.server.changedCard(this.getRoom(), value);
-		}
-
-		private join(user: PokerUser): JQueryPromise {
-			var that = this;
-			return this._poker.server.join(user).done(function (data) {
-				that.$scope.me = data;
-				that.$scope.$apply();
-			});
-		}
-
-		private leaveRoom(user: PokerUser): JQueryPromise {
-			return this._poker.server.leaveRoom(this.getRoom(), user);
-		}
-
-		private joinRoom(room: PokerRoom) : JQueryPromise {
-			var that = this;
-			return this._poker.server.joinRoom(room).done(function (data) {
-				that.$scope.room = data;
-
-				var me = that.getMe();
-				data.Cards.forEach(function (card) {
-					if (card.User.Email === me.Email)
-						that.$scope.myCard = card;
+					return roomUser;
 				});
 
-				that.$scope.$apply();
-			});
+				if (!found)
+					this.$scope.room.Users.push(user);
+
+				this.$scope.$apply();
+			}
 		}
 
-		private addRoomUser(user: PokerUser) {
-			var found = false;
-
-			this.$scope.room.Users = this.$scope.room.Users.map(function (roomUser) {
-				if (user.Email === roomUser.Email) {
-					found = true;
-					roomUser = user;
-				}
-
-				return roomUser;
-			});
-
-			if (!found)
-				this.$scope.room.Users.push(user);
-
-			this.$scope.$apply();
-		}
-
-		private removeRoomUser(user: PokerUser) {
+		private userRemoved(user: PokerUser) {
 			var found = false;
 
 			if (user.Email === this.$scope.me.Email) {
@@ -271,46 +249,84 @@ module Consensus {
 				this.$scope.room.Users = this.$scope.room.Users.filter(function (roomUser) {
 					return user.Email !== roomUser.Email;
 				});
+				this.$scope.room.Cards = this.$scope.room.Cards.filter(function (roomCard) {
+					return user.Email !== roomCard.User.Email;
+				});
 			}
 
 			this.$scope.$apply();
 		}
 
-		private disconnectedRoomUser(user: PokerUser) {
-			var found = false;
-
-			this.$scope.room.Users = this.$scope.room.Users.map(function (roomUser) {
-				if (user.Email === roomUser.Email) {
-					found = true;
-					roomUser = user;
-				}
-
-				return roomUser;
-			});
-
-			if (!found)
-				this.$scope.room.Users.push(user);
-
-			this.$scope.$apply();
-		}
-
 		private cardChanged(card: PokerCard) {
-			var found = false;
+			if (this.$scope.room.Cards) {
+				var found = false;
 
-			this.$scope.room.Cards = this.$scope.room.Cards.map(function (roomCard) {
-				if (card.User.Email === roomCard.User.Email) {
-					found = true;
-					roomCard = card;
-				}
+				this.$scope.room.Cards = this.$scope.room.Cards.map(function (roomCard) {
+					if (card.User.Email === roomCard.User.Email) {
+						found = true;
+						roomCard = card;
+					}
 
-				return roomCard;
-			});
+					return roomCard;
+				});
 
-			if (!found)
-				this.$scope.room.Cards.push(card);
+				if (!found)
+					this.$scope.room.Cards.push(card);
 
-			this.$scope.$apply();
+				this.$scope.$apply();
+			}
 		}
+
+		//#endregion
+
+		//#region Server
+
+		private join(user: PokerUser = this.me): JQueryPromise {
+			var that = this;
+			return this._poker.server.join(user).done(function (data) {
+				that.$scope.me = data;
+				that.$scope.$apply();
+			});
+		}
+
+		private joinRoom(room: PokerRoom = this.room) : JQueryPromise {
+			this.$location.path("/rooms/" + encodeURIComponent(room.Name));
+
+			var that = this;
+			return this._poker.server.joinRoom(room).done(function (data) {
+				that.$scope.room = data;
+
+				var me = that.me;
+				data.Cards.forEach(function (card) {
+					if (card.User.Email === me.Email)
+						that.$scope.myCard = card;
+				});
+
+				that.$scope.$apply();
+			});
+		}
+
+		private leaveRoom(user: PokerUser = this.me): JQueryPromise {
+			return this._poker.server.leaveRoom(this.room, user);
+		}
+
+		private resetRoom(): JQueryPromise {
+			return this._poker.server.resetRoom(this.room);
+		}
+
+		private showAllCards(): JQueryPromise {
+			return this._poker.server.showAllCards(this.room);
+		}
+
+		private changeRoomTopic(topic: string): JQueryPromise {
+			return this._poker.server.changeRoomTopic(this.room, topic);
+		}
+
+		private changedMyCardValue(value: string): JQueryPromise {
+			return this._poker.server.changedCard(this.room, value);
+		}
+
+		//#endregion
 	}
 
 	export class PokerUser {

@@ -11,8 +11,9 @@
 		@Scripts.Render("~/js/app")
 		<script src="~/signalr/hubs"> </script>
 	</head>
-	<body>
-		<div class="container-fluid playing-field" data-ng-controller="Consensus.PokerRoomCtrl">
+	<body data-ng-controller="Consensus.PokerRoomCtrl" data-ng-class="{ 'hide-room': joinModal || joinRoomModal }">
+
+		<div class="container-fluid playing-field">
 			<h2>Room: {{ room.Name }}</h2>
 			
 			<a class="pull-right btn btn-danger" data-ng-click="resetRoom()">Reset Room</a>
@@ -58,30 +59,30 @@
 					</li>
 				</ul>
 			</div>
-
-			<div id="joinModal" data-modal="joinModal" data-close="closeJoinModal()" data-options="joinModalOptions">
-				<div class="modal-header">
-					<h3>Join Consensus</h3>
-				</div>
-				<div class="modal-body">
-					<p><label>Your Name<br/><input type="text" data-ng-model="me.Name" placeholder="Your Name" required /></label></p>
-					<p><label>Your Email<br/><input type="email" data-ng-model="me.Email" placeholder="Your Email" required /></label></p>
-				</div>
-				<div class="modal-footer">
-					<a href="#" class="btn btn-primary" data-ng-click="closeJoinModal()">Join</a>
-				</div>
+		</div>
+		
+		<div id="joinModal" data-modal="joinModal" data-options="joinModalOptions">
+			<div class="modal-header">
+				<h3>Join Consensus</h3>
 			</div>
+			<div class="modal-body">
+				<p><label>Your Name<br/><input type="text" data-ng-model="me.Name" placeholder="Your Name" required /></label></p>
+				<p><label>Your Email<br/><input type="email" data-ng-model="me.Email" placeholder="Your Email" required /></label></p>
+			</div>
+			<div class="modal-footer">
+				<button class="btn btn-primary" data-ng-click="closeJoinModal()">Join</button>
+			</div>
+		</div>
 
-			<div id="joinRoomModal" data-modal="joinRoomModal" data-close="closeJoinRoomModal()" data-options="joinModalOptions">
-				<div class="modal-header">
-					<h3>Join Room</h3>
-				</div>
-				<div class="modal-body">
-					<p><label>Poker Room Name<br/><input type="text" data-ng-model="room.Name" placeholder="Room Name" required /></label></p>
-				</div>
-				<div class="modal-footer">
-					<a href="#" class="btn btn-primary" data-ng-click="closeJoinRoomModal()">Join</a>
-				</div>
+		<div id="joinRoomModal" data-modal="joinRoomModal" data-options="joinModalOptions">
+			<div class="modal-header">
+				<h3>Join Room</h3>
+			</div>
+			<div class="modal-body">
+				<p><label>Poker Room Name<br/><input type="text" data-ng-model="room.Name" placeholder="Room Name" required /></label></p>
+			</div>
+			<div class="modal-footer">
+				<button class="btn btn-primary" data-ng-click="closeJoinRoomModal()">Join</button>
 			</div>
 		</div>
 	</body>

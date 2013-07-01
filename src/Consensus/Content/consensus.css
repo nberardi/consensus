@@ -6,6 +6,12 @@
   background-position: right top;
   background-repeat: repeat-y;
 }
+body.hide-room {
+  background-image: none;
+}
+body.hide-room .container-fluid {
+  display: none;
+}
 .playing-field {
   margin-right: 250px;
 }
