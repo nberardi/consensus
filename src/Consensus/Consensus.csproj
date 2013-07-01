@@ -159,6 +159,10 @@
     <Content Include="Content\images\green-check.png" />
     <Content Include="Global.asax" />
     <Content Include="Content\consensus.less" />
+    <None Include="LICENSE">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>LICENSE1.cs</LastGenOutput>
+    </None>
     <None Include="Scripts\jquery-2.0.2.intellisense.js" />
     <Content Include="Scripts\angular-cookies.js" />
     <Content Include="Scripts\angular-cookies.min.js" />
@@ -199,7 +203,9 @@
     <Content Include="Views\Web.config" />
     <Content Include="Scripts\jquery-2.0.2.min.map" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />
   </ItemGroup>
