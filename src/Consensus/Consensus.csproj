@@ -163,6 +163,7 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>LICENSE1.cs</LastGenOutput>
     </None>
+    <None Include="Properties\PublishProfiles\Desktop_Consensus.pubxml" />
     <None Include="Scripts\jquery-2.0.2.intellisense.js" />
     <Content Include="Scripts\angular-cookies.js" />
     <Content Include="Scripts\angular-cookies.min.js" />
@@ -170,6 +171,8 @@
     <Content Include="Scripts\angular.min.js" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
+    <Content Include="Scripts\json2.js" />
+    <Content Include="Scripts\json2.min.js" />
     <Content Include="Views\Home\Index.cshtml" />
     <TypeScriptCompile Include="Scripts\consensus.pokerRoom.ts" />
     <Content Include="Scripts\consensus.pokerroom.js">
