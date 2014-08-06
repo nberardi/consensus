@@ -6,10 +6,11 @@
 <html data-ng-app="consensus">
 	<head>
 		<title>Consensus</title>
-		
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 		@Styles.Render("~/content/app")
 		@Scripts.Render("~/scripts/app")
 		<script src="~/signalr/hubs"></script>
+        <script src="scripts/json2.js"></script>
 	</head>
 	<body data-ng-controller="PokerRoomCtrl" data-ng-class="{ 'hide-room': joinModal || joinRoomModal }">
 
