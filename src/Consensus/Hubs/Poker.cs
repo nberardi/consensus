@@ -148,7 +148,7 @@ namespace Consensus.Hubs
 			Clients.Group(room.Name).cardChanged(card);
 		}
 
-		public override Task OnDisconnected()
+		public override Task OnDisconnected(bool stopCalled)
 		{
 			var user = _users.Where(x => x.Key == Context.ConnectionId).Select(x => x.Value).FirstOrDefault();
 
@@ -160,7 +160,7 @@ namespace Consensus.Hubs
 					Clients.Group(room.Name).userChanged(user);
 			}
 
-			return base.OnDisconnected();
+			return base.OnDisconnected(stopCalled);
 		}
 	}
 }
